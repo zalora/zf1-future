@@ -10,6 +10,8 @@ use Rector\Php55\Rector as Php55;
 use Rector\Php56\Rector as Php56;
 use Rector\Php70\Rector as Php70;
 use Rector\Php71\Rector as Php71;
+use Rector\Renaming\Rector\MethodCall\RenameMethodRector;
+use Rector\Renaming\ValueObject\MethodCallRename;
 use Rector\Set\ValueObject\LevelSetList;
 use Rector\ValueObject\PhpVersion;
 
@@ -22,6 +24,10 @@ return RectorConfig::configure()
         CodeQuality\Class_\CompleteDynamicPropertiesRector::class
     ])
     ->withSkip([
+        # see https://github.com/Shardj/zf1-future/pull/453
+        CodeQuality\Class_\CompleteDynamicPropertiesRector::class => [
+            __DIR__ . '/library/Zend/Pdf/Element.php',
+        ],
         Php53\FuncCall\DirNameFileConstantToDirConstantRector::class,
         Php53\Ternary\TernaryToElvisRector::class,
         Php54\Array_\LongArrayToShortArrayRector::class,
@@ -36,6 +42,13 @@ return RectorConfig::configure()
         Php71\FuncCall\RemoveExtraParametersRector::class,
         Php71\List_\ListToArrayDestructRector::class,
         __DIR__ . '/tests/Zend/Loader/_files/ParseError.php',
+        __DIR__ . '/tests/Zend/Session/SessionTest.php',
+    ])
+    ->withConfiguredRule(RenameMethodRector::class, [
+        new MethodCallRename(SplObjectStorage::class, 'attach', 'offsetSet'),
+        new MethodCallRename(SplObjectStorage::class, 'contains', 'offsetExists'),
+        new MethodCallRename(SplObjectStorage::class, 'detach', 'offsetUnset'),
+        new MethodCallRename(Zend_Acl::class, 'add', 'addResource'),
     ])
     ->withSets([
         LevelSetList::UP_TO_PHP_82
